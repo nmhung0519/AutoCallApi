@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tạo file cấu hình</title>
+	<link rel="stylesheet" type="text/css" href="src/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="src/css/jquery-ui.min.css" />
+	<script type="text/javascript" src="src/js/jquery.min.js"></script>
+	<script type="text/javascript" src="src/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="src/js/jquery-ui.min.js"></script>
+	<style>
+		table {
+			border-collapse: collapse;
+			background: white;
+			width: 100%;
+		}
+
+		tr, th {
+			border: 1px solid grey;
+		}
+
+		td {
+			border-right: 1px solid grey;
+		}
+
+		td {
+			padding: 6px;
+		}
+
+		#pnMain div {
+			padding: 12px;
+			border-radius: 12px;
+			background: lightblue;
+		}
+	</style>
+</head>
+<body style="padding: 8px">
+	<button id='btnCreateSample' class="btn btn-primary" data-toggle="modal" data-target="#pnModalShowJson">Xem Json</button>
+	<button id='btnSaveConfig' class="btn btn-success">Lưu file cấu hình</button>
+	<button id='btnImport' type="button" class="btn btn-info" data-toggle="modal" data-target="#pnModalImportJson">Tạo cấu trúc từ json</button>
+	<div id="pnHeader" style="box-shadow: 0 0 8px 0 cornflowerblue; padding: 8px; border-radius: 12px; margin-top: 20px; background: antiquewhite">
+		<h3>Header</h3>
+		<div style="padding: 12px; border-radius: 12px; background: lightblue;">
+			<table id='tblHeader'>
+				<thead>
+					<tr>
+						<th style="">Title</th>
+						<th style="">Values</th>
+						<th style="width: 50px"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td colspan='3'>
+							<button id="btnAddHeader" class="btn btn-warning">Thêm dòng</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div id="pnMain" style="box-shadow: 0 0 8px 0 cornflowerblue; padding: 8px; border-radius: 12px; margin-top: 20px; background: antiquewhite">
+		<h3>Body</h3>
+		<div style="margin-top: 18px;">
+			<table id='tblRoot'>
+				<thead>
+					<tr>
+						<th style="">Title</th>
+						<th style="">Values</th>
+						<th style="width: 50px"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td colspan='6'>
+							<button class="btnAdd btn btn-warning">Thêm dòng</button>
+							<button class="btnAddObject btn btn-warning">Thêm đối tượng</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div id="pnModalImportJson" class="modal fade">
+		<div class="modal-dialog" style="max-width: 1000px;" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Nhập Json</h5>
+					<button type="button" class="btn btn-danger" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<textarea id="inpJson" class="form-control" style="height: 500px;"></textarea>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" data-dismiss="modal" aria-label="Close">Đóng</button>
+					<button id="btnImportJson" type="button" class="btn btn-primary">Xác nhận</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="pnModalShowJson" class="modal fade">
+		<div class="modal-dialog" style="max-width: 1000px;" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Xem Json</h5>
+					<button type="button" class="btn btn-danger" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<textarea id="outJson" class="form-control" style="height: 500px;" disabled></textarea>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" data-dismiss="modal" aria-label="Close">Đóng</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var types = [
+			{ value: 1, text: "Int" },
+			{ value: 2, text: "String" },
+			{ value: 3, text: "Double" },
+			{ value: 4, text: "List&lt;Int&gt;" },
+			{ value: 5, text: "List&lt;String&gt;" },
+			{ value: 6, text: "List&lt;Double&gt;" },
+			{ value: 7, text: "List&lt;Object&gt;" }
+		];
+		var valueTypes = [
+			{ value: 1, text: "Ngẫu nhiên" },
+			{ value: 2, text: "Khoảng chỉ định" },
+			{ value: 3, text: "Giá trị cố định" }
+		];
+		var headerKey = [
+			"Accept", "Accept-Charset", "Accept-Encoding", "Accept-Language", "Access-Control-Request-Headers", "Access-Control-Reqeust-Method", "Authorization",
+			"Cache-Control", "Cache-MD5", "Content-Length", "Content-Transfer-Encoding", "Content-Type", "Cookie", "Cookie 2", "Connection",
+			"Date", "DNT",
+			"Expect",
+			"From",
+			"Host",
+			"If-Match", "If-Modified-Since", "If-None-Match", "If-Range", "If-Unmodified-Since",
+			"Keep-Alive",
+			"Max-Forwards",
+			"Origin",
+			"Pragma", "Proxy-Authorization",
+			"Range", "Referer",
+			"TE", "Trailer", "Transfer-Encoding",
+			"Upgrade", "User-Agent",
+			"Via",
+			"Warning",
+			"X-Requested-With", "X-Do-Not-Track", "x-api-key"
+		]
+		function getTextWithValue(lst, value) {
+			for (var i = 0; i < lst.length; i++) if ("" + lst[i].value == value) return lst[i].text;
+			return "";
+        }
+		function getListOption(lst, selected = -1) {
+			var content = "";
+			for (var i = 0; i < lst.length; i++) {
+				content += "<option value='" + lst[i].value + "'" + (lst[i].value == selected ? " selected" : "") + ">" + lst[i].text + "</option>";
+			}
+			return content;
+		}
+		$("body").delegate(".btnAdd", "click", function () {
+            $(this).parent().parent().before("<tr data-type='1'><td><input class='inpTitle form-control' /></td><td><select class='slTypeValue form-control' style='display: none'>" + getListOption(valueTypes) + "</select><input class='form-control'  placeholder='Giá trị đúng' style='background: lightgreen' /><a class='addTestValue' href='javascript:void(0)' >Thêm giá trị test</a><td><button class='btn btn-danger btnDelete'>X</button></td></tr>");
+		});
+		$("body").delegate(".btnAddObject", "click", function () {
+            $(this).parent().parent().before("<tr data-type='2'><td><input class='inpTitle form-control' /></td><td><div><table><thead><tr><th>Title</th><th>Values</th><th style='width: 50px'></th></tr></thead><tbody><tr><td colspan='5'><button class='btnAdd btn btn-warning'>Thêm dòng</button><button class='btnAddObject btn btn-warning' style='margin-left: 5px'>Thêm đối tượng</button></tr></tbody></table></div></td><td><button class='btn btn-danger btnDelete'>X</button></td></tr>");
+		});
+		$("body").delegate(".btnDelete", "click", function () {
+			$(this).parent().parent().remove();
+		});
+		$("body").delegate(".slTypeValue", "change", function () {
+			return;
+			if ($(this).val() != "1") {
+				$(this).parent().children("textarea").css("display", "");
+			}
+			else {
+				$(this).parent().children("textarea").css("display", "none");
+			}
+		});
+		$("#btnImportJson").click(function () {
+			var object = jsonToObject($("#inpJson").val());
+			if (object == null) return;
+			$(this).parent().children("button[aria-label=Close]")[0].click();
+            while ($("#tblRoot>tbody>tr").length > 1) {
+                $($("#tblRoot>tbody>tr")[0]).remove();
+            }
+			var content = renderStruct(object);
+			$("#tblRoot").prepend(content);
+		});
+		$("#btnCreateSample").click(function () {
+			$("#outJson").val(getJsonStruct(getStruct($("#tblRoot")), 1));
+		});
+		$("#btnSaveConfig").click(function () {
+			header = getHeader();
+			var struct = getStruct($("#tblRoot"));
+			var blob = new Blob([JSON.stringify({ Header: header, Body: struct })],
+				{ type: "text/plain;charset=utf-8" });
+			var a = document.createElement('a');
+			a.href = URL.createObjectURL(blob);
+			a.download = "config.json";
+			a.click();
+		});
+		$("body").delegate(".addTestValue", "click", function () {
+			if ($(this).parent().children("table").length == 0) {
+				$(this).before("<table style='margin-top: 8px; background: indianred'><thead><th>Mô tả</th><th>Giá trị test</th><th></th></thead><tbody></tbody></table>");
+			}
+			$(this).parent().children("table").children("tbody").append("<tr><td><input class='form-control' /></td><td><input class='form-control' /></td><td style='text-align: center'><a class='deleteTestValue text-white font-weight-bold text-decoration-none' href='javascript:void(0)'>X</a></td></tr>")
+		});
+		$("body").delegate(".deleteTestValue", "click", function () {
+			if ($(this).parent().parent().parent().children().length == 1) {
+				$(this).parent().parent().parent().parent().remove();
+			}
+			$(this).parent().parent().remove();
+		});
+		$("#btnAddHeader").click(function () {
+			$(this).parent().parent().before("<tr><td><input class='inpTitleHeader form-control' /></td><td><input class='form-control' /></td><td><button class='btn btn-danger btnDeleteHeader'>X</button></td></tr>");
+            $(".inpTitleHeader").autocomplete({
+                source: headerKey
+            });
+		});
+		$("#tblHeader").delegate(".btnDeleteHeader", "click", function () {
+			$(this).parent().parent().remove();
+		});
+		function getHeader() {
+			var headers = [];
+			for (var i = 0; i < $("#tblHeader>tbody>tr").length - 1; i++) {
+				var item = $($("#tblHeader>tbody>tr")[i]);
+				headers.push({ Key: $(item.children("td").children("input")[0]).val(), Value: $(item.children("td").children("input")[1]).val()});
+			}
+			console.log(headers);
+			return headers;
+        }
+		function renderStruct(object) {
+			var content = "";
+			for (var el in object) {
+                if (typeof object[el] === 'object' && !Array.isArray(object[el]) && object[el] !== null) {
+                    content += "<tr data-type='2'><td><input class='inpTitle form-control' value='" + el + "' /></td><td><div><table><thead><tr><th>Title</th><th>Values</th><th style='width: 50px'></th></tr></thead><tbody>" + renderStruct(object[el]) + "<tr><td colspan='5'><button class='btnAdd btn btn-warning'>Thêm dòng</button><button class='btnAddObject btn btn-warning' style='margin-left: 5px'>Thêm đối tượng</button></tr></tbody></table></div></td><td><input type='checkbox' /></td><td><button class='btn btn-danger btnDelete'>X</button></td></tr>"
+				}
+				else {
+                    content += "<tr data-type='1'><td><input class='inpTitle form-control' value='" + el + "' /></td><td><select class='slTypeValue form-control' style='display: none'>" + getListOption(valueTypes, 3) + "</select><input class='form-control' placeholder='Giá trị đúng' value='" + (typeof object[el] == "string" ? "\"" + object[el] + "\"" : object[el]) + "' style='background: lightgreen' /><a class='addTestValue' href='javascript:void(0)' >Thêm giá trị test</a></td><td><button class='btn btn-danger btnDelete'>X</button></td></tr>";
+                }
+			}
+			return content;
+        }
+		function getStruct(tbl) {
+			var struct = [];
+			var children = tbl.children("tbody").children();
+			for (var i = 0; i < children.length - 1; i++) {
+				var child = $(children[i]);
+				if (child.attr("data-type") == "1") {
+					var testValues = [];
+					for (var j = 0; j < $(child.children()[1]).children("table").children("tbody").children("tr").length; j++) {
+						var item = $($(child.children()[1]).children("table").children("tbody").children("tr")[j]);
+						testValues.push([$($(item.children()[0]).children("input")[0]).val(), $($(item.children()[1]).children("input")[0]).val()]);
+                    }
+                    struct.push([1, $(child.children()[0]).children(".inpTitle").val(), $(child.children()[1]).children("input").val(), testValues]);
+				}
+				else {
+                    struct.push([2, $(child.children()[0]).children(".inpTitle").val(), getStruct($($($(child.children()[1]).children("div")[0]).children("table")[0]))]);
+				}
+			}
+			return struct;
+		}
+		function getJsonStruct(struct, lv) {
+			var content = "{\n";
+			for (var i = 0; i < struct.length; i++) {
+				for (var j = 0; j < lv; j++) {
+					content += "\t";
+				}
+                if (struct[i][0] == 1) content += "\"" + struct[i][1] + "\": " + struct[i][2];
+				else {
+					content += "\"" + struct[i][1] + "\": " + getJsonStruct(struct[i][2], lv + 1);
+				}
+				if (i < struct.length - 1) content += ",";
+				content += "\n";
+			}
+			for (var j = 0; j < lv - 1; j++) {
+				content += "\t";
+			}
+			content += "}";
+			return content;
+		}
+		function jsonToObject(json) {
+			try {
+				return JSON.parse(json);
+			}
+			catch (ex) {
+				alert("Chuỗi json không hợp lệ");
+				return null;
+            }
+		}
+	</script>
+</body>
+</html>
